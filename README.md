@@ -7,6 +7,7 @@ mouses). It adds the installed script to the gnome autostart.
 
 - xinput
 - [optional] gnome
+- libnotify-bin
 
 ## Usage
 
