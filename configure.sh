@@ -76,9 +76,9 @@ X-GNOME-Autostart-enabled=true
 Name[en_US]=Disable mouseaccel
 Name=disable-mouseaccel
 EOF
- 
+
   echo "Autostart script installed"
-  echo ""  
+  echo ""
 }
 
 function status {
