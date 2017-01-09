@@ -9,9 +9,12 @@ Configure mouseaccel manager script for the user
   USAGE: $0 <action>
 
   ACTIONS:
-    install <device search term>
+    install <device search term> <sensitivity>
     status
     deinstall
+
+  SENSITIVITY:
+    Lower is faster (may be 2 or 3 is good)
 EOF
   exit 0
 fi
@@ -30,17 +33,27 @@ function install {
     exit 1
   fi
 
-  ids=$(xinput --list | awk -v search="$SEARCH" \
+  if [ "$SENSITIVITY" = "" ]; then
+    echo "A sensitivity value must be defined"
+    exit 1
+  fi
+
+  IDS=$(xinput --list | awk -v search="$SEARCH" \
       '$0 ~ search {match($0, /id=[0-9]+/);\
                     if (RSTART) \
                       print substr($0, RSTART+3, RLENGTH-3)\
                    }'\
        )
 
+   if [ "$IDS" = "" ]; then
+     echo "No devices found"
+     exit 1
+   fi
+
   # echo -e ""
   # read -p "What's the device to manage? " DEVICE
   # echo ""
-  echo "Device ids selected $ids"
+  echo "Selected devices ids: $IDS"
   echo ""
   [ ! -d ~/bin ] && mkdir ~/bin
   cat <<EOF > $SCRIPT_FILENAME
@@ -51,11 +64,11 @@ echo "Configure mouse"
 echo ""
 sleep 5
 # turn off mouse acceleration
-$(for i in $ids
+$(for i in $IDS
 do
     echo "xinput set-prop $i 'Device Accel Profile' -1"
-    echo "xinput set-prop $i 'Device Accel Constant Deceleration' 2.5"
-    echo "xinput set-prop $i 'Device Accel Adaptive Deceleration' 2.5"
+    echo "xinput set-prop $i 'Device Accel Constant Deceleration' $SENSITIVITY"
+    echo "xinput set-prop $i 'Device Accel Adaptive Deceleration' $SENSITIVITY"
     echo "xinput set-prop $i 'Device Accel Velocity Scaling' 1.0"
 done
 )
@@ -78,13 +91,13 @@ function status {
   xinput list
 
   if [ "$SEARCH" != "" ]; then
-    ids=$(xinput --list | awk -v search="$SEARCH" \
+    IDS=$(xinput --list | awk -v search="$SEARCH" \
         '$0 ~ search {match($0, /id=[0-9]+/);\
                       if (RSTART) \
                         print substr($0, RSTART+3, RLENGTH-3)\
                      }'\
          )
-     for i in $ids;do
+     for i in $IDS;do
        xinput list-props $i
      done
  fi
@@ -106,6 +119,7 @@ function deinstall {
 SEARCH=$2
 case "$1" in
   install)
+    SENSITIVITY=$3
     install
     ;;
   status)
