@@ -20,6 +20,7 @@ EOF
 fi
 
 SCRIPT_FILENAME="/home/$USER/bin/disable_mouse_accel.sh"
+GNOME_STARTSCRIPT="/home/$USER/.config/autostart/disable_mouse_accel.desktop"
 
 function install {
   echo -e "Install started for $SEARCH"
@@ -72,9 +73,25 @@ do
     echo "xinput set-prop $i 'Device Accel Velocity Scaling' 1.0"
 done
 )
+notify-send -t 50000  'Mouse fixed'
 EOF
   chmod +x $SCRIPT_FILENAME
   echo "Script is installed in $SCRIPT_FILENAME"
+  echo ""
+
+  [ ! -d /home/$USER/.config/autostart ] && mkdir -p /home/$USER/.config/autostart
+  cat <<EOF > $GNOME_STARTSCRIPT
+[Desktop Entry]
+Type=Application
+Exec=$SCRIPT_FILENAME
+Hidden=true
+X-GNOME-Autostart-enabled=true
+Name[en_US]=Disable mouseaccel
+Name=disable-mouseaccel
+EOF
+
+  echo "Autostart script installed"
+  echo ""
 }
 
 function status {
